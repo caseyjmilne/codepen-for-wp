@@ -1,0 +1,20 @@
+.wp-block-codepen-for-wp-snippet .cpfwp-code-field {
+	margin-bottom: 12px;
+}
+
+.wp-block-codepen-for-wp-snippet .cpfwp-code-field__label {
+	display: block;
+	font-weight: 600;
+	margin-bottom: 4px;
+}
+
+.wp-block-codepen-for-wp-snippet .cpfwp-code-field__textarea {
+	width: 100%;
+	font-family: Consolas, Monaco, monospace;
+}
+
+.wp-block-codepen-for-wp-snippet .CodeMirror {
+	border: 1px solid #ddd;
+	height: auto;
+	min-height: 120px;
+}
