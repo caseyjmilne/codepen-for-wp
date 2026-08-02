@@ -25,9 +25,9 @@ $title = isset( $attributes['title'] ) ? (string) $attributes['title'] : '';
 
 if ( '' === trim( $html ) && '' === trim( $css ) && '' === trim( $js ) ) {
 	if ( current_user_can( 'edit_posts' ) ) {
-		return '<p><em>' . esc_html__( 'CodePen Snippet: add some HTML, CSS or JS in the block editor to see a preview here.', 'codepen-for-wp' ) . '</em></p>';
+		echo '<p><em>' . esc_html__( 'CodePen Snippet: add some HTML, CSS or JS in the block editor to see a preview here.', 'codepen-for-wp' ) . '</em></p>';
 	}
-	return '';
+	return;
 }
 
 $theme = isset( $attributes['theme'] ) && 'inherit' !== $attributes['theme'] ? $attributes['theme'] : $defaults['theme'];
@@ -59,7 +59,7 @@ foreach ( $wrapper_attrs as $name => $value ) {
 
 $block_wrapper_attributes = get_block_wrapper_attributes();
 
-ob_start();
+cpfwp_enqueue_embed_script();
 ?>
 <div <?php echo wp_kses_post( $block_wrapper_attributes ); ?>>
 	<?php if ( $title ) : ?>
@@ -78,6 +78,3 @@ ob_start();
 	</div>
 </div>
 <?php
-cpfwp_enqueue_embed_script();
-
-return ob_get_clean();
