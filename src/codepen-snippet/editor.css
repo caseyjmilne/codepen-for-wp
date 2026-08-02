@@ -1,3 +1,13 @@
+/*
+ * WordPress enqueues CodeMirror's own base stylesheet (wp_enqueue_code_editor)
+ * into the top-level admin document, but the block editor canvas renders
+ * inside an iframe that does not inherit admin-only stylesheets — only
+ * styles declared via this block's own block.json "editorStyle" reliably
+ * reach that iframe. So we bundle CodeMirror's base CSS ourselves here
+ * instead of depending on wp_enqueue_code_editor()'s enqueue reaching it.
+ */
+@import "codemirror/lib/codemirror.css";
+
 .wp-block-codepen-for-wp-snippet .cpfwp-code-field {
 	margin-bottom: 12px;
 }
