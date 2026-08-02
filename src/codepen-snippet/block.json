@@ -46,7 +46,7 @@
 		"html": false,
 		"align": [ "wide", "full" ]
 	},
-	"editorScript": "cpfwp-block-editor",
-	"editorStyle": "cpfwp-block-editor-style",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
 	"render": "file:./render.php"
 }

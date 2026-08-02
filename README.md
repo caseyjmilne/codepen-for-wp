@@ -47,8 +47,26 @@ References:
 - A live in-editor preview pane (currently the preview only renders on
   the front end / block preview, not inline while typing).
 
+## Building the block
+
+The block's editor JS/CSS live in `src/codepen-snippet` and are compiled
+with `@wordpress/scripts` (the same tool `@wordpress/create-block` uses).
+`build/` is git-ignored — you need to generate it before activating:
+
+```
+npm install
+npm run build
+```
+
+Other useful scripts:
+- `npm start` — rebuilds on file changes while you work on the block.
+- `npm run plugin-zip` — builds and packages the whole plugin into a zip.
+
+If the plugin is activated without a `build/` directory present, it shows
+an admin notice telling you to run the build rather than fataling.
+
 ## Local install
 
-Copy/symlink this directory into `wp-content/plugins/codepen-for-wp` and
-activate it from the Plugins screen. No build step or npm install is
-required — the editor script is plain ES5 loaded directly by WordPress.
+1. Copy/symlink this directory into `wp-content/plugins/codepen-for-wp`.
+2. Run `npm install && npm run build` inside it (see above).
+3. Activate "CodePen for WP" from the Plugins screen.
