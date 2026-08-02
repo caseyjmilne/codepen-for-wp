@@ -81,6 +81,17 @@ Other useful scripts:
 If the plugin is activated without a `build/` directory present, it shows
 an admin notice telling you to run the build rather than fataling.
 
+## Releases
+
+Pushing a tag like `v1.0.0` triggers `.github/workflows/release.yml`,
+which builds the block, runs `npm run plugin-zip`, and attaches the
+resulting `codepen-for-wp.zip` to a new GitHub Release for that tag.
+That zip contains only the runtime files a site needs (`build/`,
+`includes/`, `codepen-for-wp.php`, `README.md`) under a single
+`codepen-for-wp/` folder — no `src/`, `node_modules/`, or dev tooling —
+so it can be extracted straight into `wp-content/plugins/`, or uploaded
+as-is via Plugins → Add New → Upload Plugin.
+
 ## Local install
 
 1. Copy/symlink this directory into `wp-content/plugins/codepen-for-wp`.
