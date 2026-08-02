@@ -1,5 +1,5 @@
 === CodePen for WP ===
-Contributors: yourwporgusername
+Contributors: arcwordpress
 Tags: codepen, embed, code snippet, block editor, live preview
 Requires at least: 6.1
 Tested up to: 7.0

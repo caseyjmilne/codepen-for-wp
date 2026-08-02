@@ -115,9 +115,6 @@ actual directory submission:
   folder/slug, `package.json` name (drives the release zip filename), the
   block namespace (`codepen-for-wp/snippet`), text domain, and this
   readme.
-- `readme.txt`'s `Contributors:` field has a placeholder
-  (`yourwporgusername`) — replace with a real wordpress.org username
-  before submitting (required for SVN commit access).
 - No `screenshot-*.png` assets exist yet. On wp.org these live in the
   plugin's `/assets/` SVN directory (not inside the plugin zip itself)
   and should be added once the UI/branding is final.
