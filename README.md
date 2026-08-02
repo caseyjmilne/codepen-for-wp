@@ -101,7 +101,7 @@ and `uninstall.php` cleans up the plugin's stored option and its own
 scope from remembered editor preferences. Still outstanding before an
 actual directory submission:
 
-- **Plugin name/slug — needs a decision, not yet resolved.** WordPress.org's
+- **Plugin name/slug — known risk, kept as-is by choice.** WordPress.org's
   [naming
   guidelines](https://make.wordpress.org/plugins/2015/10/05/guidelines-for-plugins-that-include-company-andor-product-names-in-the-plugin-name/)
   explicitly reject third-party plugin names/slugs that *start* with a
@@ -109,11 +109,12 @@ actual directory submission:
   example of a **rejected** name, which is what "CodePen for WP" and the
   `codepen-for-wp` slug both do. The accepted pattern for unaffiliated
   plugins is "Feature Name for CodePen" (e.g. "Snippet Embeds for
-  CodePen"). Renaming touches the plugin header, folder/slug,
-  `package.json` name (which drives the release zip filename), the block
-  namespace (`codepen-for-wp/snippet`), text domain, and this readme —
-  worth deciding on a final name before doing that pass, rather than
-  guessing.
+  CodePen"). Decision: keep the current name for now and accept the risk
+  of a rename request during wp.org review, rather than rename
+  preemptively. If that changes, a rename touches the plugin header,
+  folder/slug, `package.json` name (drives the release zip filename), the
+  block namespace (`codepen-for-wp/snippet`), text domain, and this
+  readme.
 - `readme.txt`'s `Contributors:` field has a placeholder
   (`yourwporgusername`) — replace with a real wordpress.org username
   before submitting (required for SVN commit access).
