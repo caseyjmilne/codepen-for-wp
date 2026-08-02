@@ -1,0 +1,22 @@
+{
+	"name": "codepen-for-wp",
+	"version": "0.1.0",
+	"description": "Write HTML/CSS/JS in a code editor inside Gutenberg and display it as a live CodePen embed sourced from WordPress.",
+	"private": true,
+	"license": "GPL-2.0-or-later",
+	"scripts": {
+		"start": "wp-scripts start",
+		"build": "wp-scripts build",
+		"format": "wp-scripts format",
+		"lint:js": "wp-scripts lint-js",
+		"lint:css": "wp-scripts lint-style",
+		"packages-update": "wp-scripts packages-update",
+		"plugin-zip": "wp-scripts plugin-zip"
+	},
+	"devDependencies": {
+		"@wordpress/scripts": "^30.0.0"
+	},
+	"dependencies": {
+		"codemirror": "^5.65.21"
+	}
+}

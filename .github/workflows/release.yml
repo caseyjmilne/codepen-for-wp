@@ -1,0 +1,43 @@
+name: Build release zip
+
+# Fires on version tags like v1.0.0, v1.2.3-beta.1, etc. Builds the block
+# assets, packages a WordPress-install-ready zip (source files, node_modules,
+# tests, and CI config excluded — see plugin-zip's file discovery in
+# package.json/wp-scripts), and attaches it to a GitHub Release for the tag.
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build block assets
+        run: npm run build
+
+      - name: Create plugin zip
+        run: npm run plugin-zip
+
+      - name: Create GitHub Release and attach zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ github.ref_name }}" codepen-for-wp.zip \
+            --title "${{ github.ref_name }}" \
+            --generate-notes

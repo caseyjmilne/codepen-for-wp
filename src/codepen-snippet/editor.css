@@ -1,0 +1,55 @@
+/*
+ * WordPress enqueues CodeMirror's own base stylesheet (wp_enqueue_code_editor)
+ * into the top-level admin document, but the block editor canvas renders
+ * inside an iframe that does not inherit admin-only stylesheets — only
+ * styles declared via this block's own block.json "editorStyle" reliably
+ * reach that iframe. So we bundle CodeMirror's base CSS ourselves here
+ * instead of depending on wp_enqueue_code_editor()'s enqueue reaching it.
+ */
+@import "codemirror/lib/codemirror.css";
+
+.wp-block-codepen-for-wp-snippet .cpfwp-code-field {
+	margin-bottom: 12px;
+}
+
+.wp-block-codepen-for-wp-snippet .cpfwp-code-field__label {
+	display: block;
+	font-weight: 600;
+	margin-bottom: 4px;
+}
+
+.wp-block-codepen-for-wp-snippet .cpfwp-code-field__textarea {
+	width: 100%;
+	font-family: Consolas, Monaco, monospace;
+}
+
+.wp-block-codepen-for-wp-snippet .CodeMirror {
+	border: 1px solid #ddd;
+	height: auto;
+	min-height: 120px;
+}
+
+/*
+ * Each tab already gets a colored underline when active (an ::after that's
+ * 0px tall until selected) — but with nothing under the *inactive* tabs,
+ * the whole bar has no visual anchor and the first tab reads as randomly
+ * indented rather than "the start of a tab bar". A constant border under
+ * the full row gives every tab the same baseline; the active tab's
+ * underline then just sits on top of it.
+ */
+.wp-block-codepen-for-wp-snippet .cpfwp-editor-tabs .components-tab-panel__tabs {
+	margin-bottom: 8px;
+	border-bottom: 1px solid #ddd;
+}
+
+.wp-block-codepen-for-wp-snippet .cpfwp-preview-pane__toolbar {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 8px;
+}
+
+.wp-block-codepen-for-wp-snippet .cpfwp-preview-pane__empty {
+	color: #757575;
+	font-style: italic;
+}
