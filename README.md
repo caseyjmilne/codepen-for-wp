@@ -128,5 +128,4 @@ actual directory submission:
 ## Local install
 
 1. Copy/symlink this directory into `wp-content/plugins/codepen-for-wp`.
-2. Run `npm install && npm run build` inside it (see above).
-3. Activate "CodePen for WP" from the Plugins screen.
+2. Activate "CodePen for WP" from the Plugins screen.
