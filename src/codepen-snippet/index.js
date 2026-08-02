@@ -175,6 +175,10 @@ function PreviewPane( { isActive, html, css, js } ) {
 		containerRef.current.innerHTML = '';
 		const wrapper = doc.createElement( 'div' );
 		wrapper.className = 'cpfwp-preview-target';
+		// The embed script's own S() attribute parser requires this attribute
+		// to be present (regardless of value) — without it, it silently treats
+		// the element as "not a valid prefill config" and skips conversion.
+		wrapper.setAttribute( 'data-prefill', '' );
 		wrapper.setAttribute( 'data-height', '300' );
 		wrapper.setAttribute( 'data-default-tab', 'result' );
 
