@@ -151,7 +151,7 @@ const CODEPEN_EMBED_SCRIPT_ID = 'cpfwp-codepen-embed-script';
  * injected into that iframe's own document (via a ref's ownerDocument)
  * rather than the top-level admin document.
  */
-function PreviewPane( { isActive, html, css, js } ) {
+function PreviewPane( { isActive, html, css, js, theme, height, defaultTab, editable } ) {
 	const containerRef = useRef( null );
 	const [ refreshToken, setRefreshToken ] = useState( 0 );
 	const [ isLoading, setIsLoading ] = useState( false );
@@ -178,9 +178,18 @@ function PreviewPane( { isActive, html, css, js } ) {
 		// The embed script's own S() attribute parser requires this attribute
 		// to be present (regardless of value) — without it, it silently treats
 		// the element as "not a valid prefill config" and skips conversion.
+		// The rest mirror render.php's front-end markup exactly, so the
+		// preview matches what visitors will actually see: same theme,
+		// height, and pane(s) shown (including split views like "css,result").
 		wrapper.setAttribute( 'data-prefill', '' );
-		wrapper.setAttribute( 'data-height', '300' );
-		wrapper.setAttribute( 'data-default-tab', 'result' );
+		wrapper.setAttribute( 'data-height', String( height ) );
+		wrapper.setAttribute( 'data-default-tab', defaultTab );
+		if ( 'default' !== theme ) {
+			wrapper.setAttribute( 'data-theme-id', theme );
+		}
+		if ( editable ) {
+			wrapper.setAttribute( 'data-editable', 'true' );
+		}
 
 		( [ [ 'html', html ], [ 'css', css ], [ 'js', js ] ] ).forEach( ( [ lang, code ] ) => {
 			if ( code && code.trim() ) {
@@ -217,11 +226,13 @@ function PreviewPane( { isActive, html, css, js } ) {
 				win.clearInterval( pollId );
 			}
 		};
-		// Deliberately re-run only when the tab is opened or Refresh is
-		// clicked — not on every keystroke, since editing happens on a
-		// different (hidden) tab anyway.
+		// Deliberately excludes html/css/js: re-run when the tab is opened,
+		// Refresh is clicked, or a display setting changes (the Inspector
+		// sidebar is visible regardless of which editor tab is active) — but
+		// not on every keystroke, since editing happens on a different
+		// (hidden) tab anyway.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ isActive, refreshToken ] );
+	}, [ isActive, refreshToken, theme, height, defaultTab, editable ] );
 
 	return (
 		<div className="cpfwp-preview-pane" style={ { display: isActive ? 'block' : 'none' } }>
@@ -281,6 +292,16 @@ registerBlockType( metadata.name, {
 			.split( ',' )
 			.map( ( pane ) => pane.trim() )
 			.filter( Boolean );
+
+		// Same "attribute overrides site default" resolution render.php uses on
+		// the front end, so the in-editor preview matches what visitors see:
+		// same theme, height, pane(s)/split view, and editability.
+		const effectiveTheme = 'inherit' !== attributes.theme ? attributes.theme : ( defaults.theme || 'default' );
+		const effectiveHeight = attributes.height ? attributes.height : ( defaults.height || 400 );
+		const effectiveDefaultTab = activeTabPanes.join( ',' ) || 'result';
+		const effectiveEditable = 'inherit' !== attributes.editable
+			? 'true' === attributes.editable
+			: !! defaults.editable;
 
 		function toggleTabPane( pane, checked ) {
 			const next = checked
@@ -378,6 +399,10 @@ registerBlockType( metadata.name, {
 						html={ attributes.html }
 						css={ attributes.css }
 						js={ attributes.js }
+						theme={ effectiveTheme }
+						height={ effectiveHeight }
+						defaultTab={ effectiveDefaultTab }
+						editable={ effectiveEditable }
 					/>
 				</div>
 			</>
