@@ -36,13 +36,31 @@ class CPFWP_Settings {
 	/**
 	 * Baseline values used on activation and whenever a stored option is missing a key.
 	 */
+	/**
+	 * Panes CodePen's "data-default-tab" attribute can show. It accepts a
+	 * comma-separated combination of these (e.g. "css,result") to show more
+	 * than one pane by default, not just a single tab.
+	 */
+	const TAB_PANES = array( 'html', 'css', 'js', 'result' );
+
 	public static function get_defaults() {
 		return array(
-			'theme'        => 'default', // default|light|dark
+			'theme'        => 'default',     // default|light|dark
 			'height'       => 400,
-			'default_tab'  => 'result',  // result|html|css|js
+			'default_tab'  => 'css,result',  // comma-separated subset of self::TAB_PANES
 			'editable'     => false,
 		);
+	}
+
+	/**
+	 * Normalizes a "default tab" value into a comma-joined string of valid
+	 * panes, in canonical (html, css, js, result) order, deduplicated.
+	 * Falls back to $fallback if nothing valid survives.
+	 */
+	public static function sanitize_default_tab( $value, $fallback = 'result' ) {
+		$requested = array_map( 'trim', explode( ',', (string) $value ) );
+		$valid     = array_values( array_intersect( self::TAB_PANES, $requested ) );
+		return $valid ? implode( ',', $valid ) : $fallback;
 	}
 
 	/**
@@ -131,10 +149,8 @@ class CPFWP_Settings {
 		$height           = isset( $input['height'] ) ? absint( $input['height'] ) : $defaults['height'];
 		$output['height'] = min( max( $height, 100 ), 2000 );
 
-		$allowed_tabs = array( 'result', 'html', 'css', 'js' );
-		$output['default_tab'] = in_array( $input['default_tab'] ?? '', $allowed_tabs, true )
-			? $input['default_tab']
-			: $defaults['default_tab'];
+		$requested_tabs         = isset( $input['default_tab'] ) ? (array) $input['default_tab'] : array();
+		$output['default_tab'] = self::sanitize_default_tab( implode( ',', $requested_tabs ), $defaults['default_tab'] );
 
 		$output['editable'] = ! empty( $input['editable'] );
 
@@ -185,15 +201,29 @@ class CPFWP_Settings {
 	}
 
 	public function render_default_tab_field() {
-		$settings = self::get_settings();
+		$settings     = self::get_settings();
+		$active_panes = explode( ',', $settings['default_tab'] );
+		$labels       = array(
+			'html'   => 'HTML',
+			'css'    => 'CSS',
+			'js'     => 'JS',
+			'result' => __( 'Result (preview)', 'codepen-for-wp' ),
+		);
 		?>
-		<select name="<?php echo esc_attr( self::OPTION_KEY ); ?>[default_tab]">
-			<?php foreach ( array( 'result' => __( 'Result (preview)', 'codepen-for-wp' ), 'html' => 'HTML', 'css' => 'CSS', 'js' => 'JS' ) as $value => $label ) : ?>
-				<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $settings['default_tab'], $value ); ?>>
+		<fieldset>
+			<?php foreach ( $labels as $pane => $label ) : ?>
+				<label style="display:inline-block;margin-right:16px;">
+					<input type="checkbox"
+						name="<?php echo esc_attr( self::OPTION_KEY ); ?>[default_tab][]"
+						value="<?php echo esc_attr( $pane ); ?>"
+						<?php checked( in_array( $pane, $active_panes, true ) ); ?> />
 					<?php echo esc_html( $label ); ?>
-				</option>
+				</label>
 			<?php endforeach; ?>
-		</select>
+			<p class="description">
+				<?php esc_html_e( 'Which panes are visible by default. Check more than one (e.g. CSS + Result) to show a split view instead of a single tab.', 'codepen-for-wp' ); ?>
+			</p>
+		</fieldset>
 		<?php
 	}
 

@@ -28,13 +28,21 @@ References:
 ## What's here (v0.1.0 draft)
 
 - **Settings page** (Settings → CodePen for WP): site-wide defaults for
-  embed theme, height, default open tab, and whether the live preview is
-  editable by visitors. Every block can override these individually.
+  embed theme, height, which pane(s) show by default (check more than one,
+  e.g. CSS + Result, for a split view instead of a single tab), and whether
+  the live preview is editable by visitors. Every block can override these
+  individually.
 - **"CodePen Snippet" block**: three code fields (HTML/CSS/JS) backed by
   WordPress' own bundled CodeMirror editor (the same one Core's Custom
   HTML block uses) for proper syntax highlighting and indentation, plus
-  an Inspector panel for per-block title/theme/height/tab/editable
+  an Inspector panel for per-block title/theme/height/tab(s)/editable
   overrides.
+- **Remembered block settings**: changing theme/height/tabs/editable on
+  any block (via `@wordpress/preferences`, persisted server-side to the
+  current user's meta) is recalled automatically the next time you drop
+  in a fresh CodePen Snippet block — you don't have to re-pick them every
+  time. Content fields (title/HTML/CSS/JS) are obviously never shared
+  between blocks.
 - **Dynamic (server-side) rendering**: the block outputs the Prefill
   Embed markup from the stored attributes at render time, so changing the
   embed markup logic later doesn't require re-saving every post.
