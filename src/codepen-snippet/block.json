@@ -9,10 +9,6 @@
 	"keywords": [ "codepen", "code", "embed", "snippet" ],
 	"textdomain": "codepen-for-wp",
 	"attributes": {
-		"title": {
-			"type": "string",
-			"default": ""
-		},
 		"html": {
 			"type": "string",
 			"default": ""

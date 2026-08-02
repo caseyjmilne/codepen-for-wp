@@ -21,7 +21,6 @@ $defaults = CPFWP_Settings::get_settings();
 $html = isset( $attributes['html'] ) ? (string) $attributes['html'] : '';
 $css  = isset( $attributes['css'] ) ? (string) $attributes['css'] : '';
 $js   = isset( $attributes['js'] ) ? (string) $attributes['js'] : '';
-$title = isset( $attributes['title'] ) ? (string) $attributes['title'] : '';
 
 if ( '' === trim( $html ) && '' === trim( $css ) && '' === trim( $js ) ) {
 	if ( current_user_can( 'edit_posts' ) ) {
@@ -62,9 +61,6 @@ $block_wrapper_attributes = get_block_wrapper_attributes();
 cpfwp_enqueue_embed_script();
 ?>
 <div <?php echo wp_kses_post( $block_wrapper_attributes ); ?>>
-	<?php if ( $title ) : ?>
-		<p class="cpfwp-snippet-title"><?php echo esc_html( $title ); ?></p>
-	<?php endif; ?>
 	<div<?php echo $attr_string; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built and escaped above. ?>>
 		<?php if ( '' !== trim( $html ) ) : ?>
 			<pre data-lang="html"><?php echo esc_html( $html ); ?></pre>

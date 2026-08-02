@@ -3,7 +3,6 @@ import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import {
 	PanelBody,
 	BaseControl,
-	TextControl,
 	SelectControl,
 	CheckboxControl,
 	RangeControl,
@@ -315,11 +314,6 @@ registerBlockType( metadata.name, {
 			<>
 				<InspectorControls>
 					<PanelBody title={ __( 'CodePen Embed Settings', 'codepen-for-wp' ) }>
-						<TextControl
-							label={ __( 'Title', 'codepen-for-wp' ) }
-							value={ attributes.title }
-							onChange={ ( value ) => setAttributes( { title: value } ) }
-						/>
 						<SelectControl
 							label={ __( 'Theme', 'codepen-for-wp' ) }
 							value={ attributes.theme }
