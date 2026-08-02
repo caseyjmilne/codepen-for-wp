@@ -29,8 +29,17 @@
 	min-height: 120px;
 }
 
+/*
+ * Each tab already gets a colored underline when active (an ::after that's
+ * 0px tall until selected) — but with nothing under the *inactive* tabs,
+ * the whole bar has no visual anchor and the first tab reads as randomly
+ * indented rather than "the start of a tab bar". A constant border under
+ * the full row gives every tab the same baseline; the active tab's
+ * underline then just sits on top of it.
+ */
 .wp-block-codepen-for-wp-snippet .cpfwp-editor-tabs .components-tab-panel__tabs {
 	margin-bottom: 8px;
+	border-bottom: 1px solid #ddd;
 }
 
 .wp-block-codepen-for-wp-snippet .cpfwp-preview-pane__toolbar {
