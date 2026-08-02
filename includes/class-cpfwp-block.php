@@ -103,7 +103,11 @@ class CPFWP_Block {
 	 */
 	public static function enqueue_embed_script() {
 		if ( ! wp_script_is( self::EMBED_SCRIPT_HANDLE, 'registered' ) ) {
-			wp_register_script( self::EMBED_SCRIPT_HANDLE, self::EMBED_SCRIPT_SRC, array(), null, true );
+			// version is deliberately null (not omitted): this is a third-party
+			// CDN asset we don't control the versioning of, and null tells
+			// wp_register_script() not to append our own cache-busting query
+			// string to a URL that already manages its own caching.
+			wp_register_script( self::EMBED_SCRIPT_HANDLE, self::EMBED_SCRIPT_SRC, array(), null, true ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
 			wp_script_add_data( self::EMBED_SCRIPT_HANDLE, 'strategy', 'async' );
 		}
 		wp_enqueue_script( self::EMBED_SCRIPT_HANDLE );
