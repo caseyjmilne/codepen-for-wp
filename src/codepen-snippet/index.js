@@ -7,8 +7,11 @@ import {
 	SelectControl,
 	CheckboxControl,
 	RangeControl,
+	TabPanel,
+	Button,
+	Spinner,
 } from '@wordpress/components';
-import { useRef, useEffect } from '@wordpress/element';
+import { useRef, useEffect, useState } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { store as preferencesStore } from '@wordpress/preferences';
 import { __ } from '@wordpress/i18n';
@@ -34,6 +37,15 @@ const TAB_PANES = [
 ];
 const TAB_PANE_ORDER = TAB_PANES.map( ( pane ) => pane.key );
 
+// Tabs shown in the block's own editing UI (distinct from the "Default
+// Tab(s)" display setting above, which is about the front-end embed).
+const EDITOR_TABS = [
+	{ name: 'html', title: 'HTML' },
+	{ name: 'css', title: 'CSS' },
+	{ name: 'js', title: 'JS' },
+	{ name: 'preview', title: __( 'Preview', 'codepen-for-wp' ) },
+];
+
 function isUntouchedSettings( attributes ) {
 	return SETTINGS_KEYS.every( ( key ) => attributes[ key ] === metadata.attributes[ key ].default );
 }
@@ -42,11 +54,20 @@ function isUntouchedSettings( attributes ) {
  * A single labeled code field, backed by WordPress' bundled CodeMirror (the
  * same editor Core's Custom HTML block uses) when it's available, falling
  * back to a plain textarea if the current user has syntax highlighting
- * turned off in their profile.
+ * turned off in their profile. Stays mounted (just visually hidden) while
+ * its tab isn't active, so switching tabs doesn't lose cursor/scroll/undo
+ * history — CodeMirror just needs a `refresh()` once it becomes visible
+ * again, since it can't measure itself correctly while `display: none`.
  */
-function CodeField( { lang, label, value, onChange } ) {
+function CodeField( { lang, label, value, onChange, isActive } ) {
 	const textareaRef = useRef( null );
 	const cmRef = useRef( null );
+
+	useEffect( () => {
+		if ( isActive && cmRef.current ) {
+			cmRef.current.refresh();
+		}
+	}, [ isActive ] );
 
 	useEffect( () => {
 		const settings = blockData.codeEditor ? blockData.codeEditor[ lang ] : null;
@@ -91,7 +112,7 @@ function CodeField( { lang, label, value, onChange } ) {
 	}, [] );
 
 	return (
-		<div className="cpfwp-code-field">
+		<div className="cpfwp-code-field" style={ { display: isActive ? 'block' : 'none' } }>
 			<label className="cpfwp-code-field__label">{ label }</label>
 			<textarea
 				ref={ textareaRef }
@@ -114,10 +135,113 @@ function CodeField( { lang, label, value, onChange } ) {
 	);
 }
 
+const CODEPEN_EMBED_SCRIPT_SRC = 'https://public.codepenassets.com/embed/index.js';
+const CODEPEN_EMBED_SCRIPT_ID = 'cpfwp-codepen-embed-script';
+
+/**
+ * A live CodePen "Prefill Embed" preview of the current HTML/CSS/JS, built
+ * right in the block editor using the same mechanism the front end uses —
+ * no data is sent to or stored on CodePen's servers. Rebuilt from scratch
+ * each time this tab is opened (or Refresh is pressed): CodePen doesn't
+ * document a way to update an existing embed in place, only to convert a
+ * prepared element into one via the global window.__CPEmbed(selector) call.
+ *
+ * The embed script must run inside the SAME document as the target element.
+ * The block editor canvas renders in an iframe, so the script tag is
+ * injected into that iframe's own document (via a ref's ownerDocument)
+ * rather than the top-level admin document.
+ */
+function PreviewPane( { isActive, html, css, js } ) {
+	const containerRef = useRef( null );
+	const [ refreshToken, setRefreshToken ] = useState( 0 );
+	const [ isLoading, setIsLoading ] = useState( false );
+
+	useEffect( () => {
+		if ( ! isActive || ! containerRef.current ) {
+			return;
+		}
+
+		const doc = containerRef.current.ownerDocument;
+		const win = doc.defaultView;
+
+		if ( ! doc.getElementById( CODEPEN_EMBED_SCRIPT_ID ) ) {
+			const script = doc.createElement( 'script' );
+			script.id = CODEPEN_EMBED_SCRIPT_ID;
+			script.async = true;
+			script.src = CODEPEN_EMBED_SCRIPT_SRC;
+			doc.body.appendChild( script );
+		}
+
+		containerRef.current.innerHTML = '';
+		const wrapper = doc.createElement( 'div' );
+		wrapper.className = 'cpfwp-preview-target';
+		wrapper.setAttribute( 'data-height', '300' );
+		wrapper.setAttribute( 'data-default-tab', 'result' );
+
+		( [ [ 'html', html ], [ 'css', css ], [ 'js', js ] ] ).forEach( ( [ lang, code ] ) => {
+			if ( code && code.trim() ) {
+				const pre = doc.createElement( 'pre' );
+				pre.setAttribute( 'data-lang', lang );
+				pre.textContent = code;
+				wrapper.appendChild( pre );
+			}
+		} );
+
+		containerRef.current.appendChild( wrapper );
+
+		setIsLoading( true );
+		let pollId;
+		const convert = () => {
+			setIsLoading( false );
+			wrapper.classList.add( 'codepen' );
+			win.__CPEmbed( '.cpfwp-preview-target' );
+		};
+
+		if ( win.__CPEmbed ) {
+			convert();
+		} else {
+			pollId = win.setInterval( () => {
+				if ( win.__CPEmbed ) {
+					win.clearInterval( pollId );
+					convert();
+				}
+			}, 200 );
+		}
+
+		return () => {
+			if ( pollId ) {
+				win.clearInterval( pollId );
+			}
+		};
+		// Deliberately re-run only when the tab is opened or Refresh is
+		// clicked — not on every keystroke, since editing happens on a
+		// different (hidden) tab anyway.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ isActive, refreshToken ] );
+
+	return (
+		<div className="cpfwp-preview-pane" style={ { display: isActive ? 'block' : 'none' } }>
+			<div className="cpfwp-preview-pane__toolbar">
+				<Button variant="secondary" onClick={ () => setRefreshToken( ( n ) => n + 1 ) }>
+					{ __( 'Refresh Preview', 'codepen-for-wp' ) }
+				</Button>
+				{ isLoading && <Spinner /> }
+			</div>
+			{ ! html && ! css && ! js && (
+				<p className="cpfwp-preview-pane__empty">
+					{ __( 'Add some HTML, CSS or JS to see a live preview here.', 'codepen-for-wp' ) }
+				</p>
+			) }
+			<div ref={ containerRef } />
+		</div>
+	);
+}
+
 registerBlockType( metadata.name, {
 	edit( { attributes, setAttributes } ) {
 		const blockProps = useBlockProps();
 		const defaults = blockData.defaults || {};
+		const [ activeTab, setActiveTab ] = useState( 'html' );
 
 		const lastUsedSettings = useSelect(
 			( select ) => select( preferencesStore ).get( PREFERENCE_SCOPE, PREFERENCE_KEY ),
@@ -216,23 +340,40 @@ registerBlockType( metadata.name, {
 					</PanelBody>
 				</InspectorControls>
 				<div { ...blockProps }>
+					<TabPanel
+						className="cpfwp-editor-tabs"
+						tabs={ EDITOR_TABS }
+						initialTabName="html"
+						onSelect={ setActiveTab }
+					>
+						{ () => null }
+					</TabPanel>
 					<CodeField
 						lang="html"
 						label="HTML"
 						value={ attributes.html }
 						onChange={ ( value ) => setAttributes( { html: value } ) }
+						isActive={ activeTab === 'html' }
 					/>
 					<CodeField
 						lang="css"
 						label="CSS"
 						value={ attributes.css }
 						onChange={ ( value ) => setAttributes( { css: value } ) }
+						isActive={ activeTab === 'css' }
 					/>
 					<CodeField
 						lang="js"
 						label="JS"
 						value={ attributes.js }
 						onChange={ ( value ) => setAttributes( { js: value } ) }
+						isActive={ activeTab === 'js' }
+					/>
+					<PreviewPane
+						isActive={ activeTab === 'preview' }
+						html={ attributes.html }
+						css={ attributes.css }
+						js={ attributes.js }
 					/>
 				</div>
 			</>

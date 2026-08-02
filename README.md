@@ -32,11 +32,21 @@ References:
   e.g. CSS + Result, for a split view instead of a single tab), and whether
   the live preview is editable by visitors. Every block can override these
   individually.
-- **"CodePen Snippet" block**: three code fields (HTML/CSS/JS) backed by
+- **"CodePen Snippet" block**: HTML/CSS/JS fields, each under its own tab
+  (plus a Preview tab) so only one is visible at a time, backed by
   WordPress' own bundled CodeMirror editor (the same one Core's Custom
-  HTML block uses) for proper syntax highlighting and indentation, plus
-  an Inspector panel for per-block title/theme/height/tab(s)/editable
-  overrides.
+  HTML block uses) for proper syntax highlighting and indentation. An
+  Inspector panel covers per-block title/theme/height/tab(s)/editable
+  overrides. Switching tabs doesn't lose your place — each editor stays
+  mounted (just hidden) so cursor position, scroll, and undo history
+  survive.
+- **In-editor live preview**: the Preview tab builds a real CodePen
+  embed right there in the block editor, from whatever HTML/CSS/JS is
+  currently in the other tabs — the same Prefill Embed mechanism used on
+  the front end, so nothing is sent to or stored on CodePen's servers to
+  show it. It's rebuilt fresh each time you open the tab or press
+  "Refresh Preview" (CodePen doesn't offer a way to update an embed in
+  place, only to convert a prepared element into a new one).
 - **Remembered block settings**: changing theme/height/tabs/editable on
   any block (via `@wordpress/preferences`, persisted server-side to the
   current user's meta) is recalled automatically the next time you drop
@@ -52,8 +62,6 @@ References:
 - Preprocessor support (SCSS/Sass, TypeScript/Babel) — CodePen's prefill
   format supports these; the block currently always sends plain HTML/CSS/JS.
 - Lazy-loading (click-to-load) embeds for pages with many snippets.
-- A live in-editor preview pane (currently the preview only renders on
-  the front end / block preview, not inline while typing).
 
 ## Building the block
 
