@@ -36,6 +36,28 @@
 				cmRef.current.on( 'blur', function ( instance ) {
 					props.onChange( instance.getValue() );
 				} );
+
+				// The block editor's canvas normally treats Tab as "move to the
+				// next block/toolbar", which is exactly what a code field must
+				// NOT do — Tab needs to indent. We handle it explicitly here,
+				// ahead of Gutenberg's own key handling, so indenting a
+				// selection (or inserting a tab at the cursor) always wins.
+				// Escape still lets a keyboard user deliberately leave the field.
+				cmRef.current.on( 'keydown', function ( instance, event ) {
+					if ( 'Tab' === event.key ) {
+						event.preventDefault();
+						event.stopPropagation();
+						if ( event.shiftKey ) {
+							instance.execCommand( 'indentLess' );
+						} else if ( instance.somethingSelected() ) {
+							instance.execCommand( 'indentMore' );
+						} else {
+							instance.execCommand( 'insertTab' );
+						}
+					} else if ( 'Escape' === event.key ) {
+						instance.getInputField().blur();
+					}
+				} );
 			}
 
 			return function () {
